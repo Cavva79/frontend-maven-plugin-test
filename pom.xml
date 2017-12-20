@@ -1,0 +1,107 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>it.cavascotti</groupId>
+	<artifactId>frontend-maven-plugin-test</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+
+	<properties>
+		<frontend.version>1.7-SNAPSHOT</frontend.version>
+		<!-- To build without m2e -->
+		<frontend.deploy>--dest target/${project.build.finalName}</frontend.deploy>
+	</properties>
+
+	<profiles>
+		<profile>
+			<id>m2e</id>
+			<activation>
+				<property>
+					<name>m2e.version</name>
+				</property>
+			</activation>
+			<properties>
+				<frontend.deploy>--dest
+					${project.build.directory}/m2e-wtp/web-resources</frontend.deploy>
+			</properties>
+		</profile>
+	</profiles>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>${frontend.version}</version>
+				<configuration>
+					<workingDirectory></workingDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install node and npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<configuration>
+							<nodeVersion>v8.9.3</nodeVersion>
+							<npmVersion>5.5.1</npmVersion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>install</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>gulp build</id>
+						<goals>
+							<goal>gulp</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<arguments>vendorsJs ${frontend.deploy}</arguments>
+							<triggerfiles>
+								<triggerfile>Gulpfile.js</triggerfile>
+								<triggerfile>package.json</triggerfile>
+							</triggerfiles>
+						</configuration>
+					</execution>
+					<execution>
+						<id>gulp javascripts</id>
+						<goals>
+							<goal>gulp</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<arguments>javascripts lint ${frontend.deploy}</arguments>
+							<srcdir>src/main/frontend/js</srcdir>
+						</configuration>
+					</execution>
+					<execution>
+						<id>gulp styles</id>
+						<goals>
+							<goal>gulp</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<arguments>styles ${frontend.deploy}</arguments>
+							<srcdir>src/main/frontend/scss</srcdir>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
